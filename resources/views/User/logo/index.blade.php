@@ -129,18 +129,39 @@
                 font-size: 16px;
             }
 
+            /* Tidy mobile logo: center, scale, and avoid clipping */
             .logo-container {
-                width: 280px;
+                width: 220px; /* slightly smaller so it fits */
+                height: auto;
+                margin: 0 auto;
+                display: block;
+                position: relative;
+                top: 0;
             }
 
+            .logo-image {
+                width: 100%;
+                height: auto;
+                display: block;
+                max-height: 280px; /* avoid very tall images that overflow */
+            }
+
+            /* Remove large decoration on mobile so it doesn't cover content */
             .corner-decoration {
-                width: 550px;
-                height: 550px;
-                right: -100px;
+                display: none;
             }
 
+            /* Ensure the nav and hamburger sit above everything */
+            nav { z-index: 99999; }
+            #menu-btn { z-index: 100000; }
+
+            /* Hide right-side image and show only the text column on mobile */
+            .right-section { display: none; }
+
+            /* Make left column (text) full width and add comfortable padding */
             .container {
-                padding: 120px 20px 40px;
+                grid-template-columns: 1fr;
+                padding: 150px 35px 20px;
             }
         }
     </style>
@@ -151,8 +172,7 @@
     <div class="corner-decoration"></div>
     <div class="corner-decoration-bottom"></div>
 
-    <!-- Navigation -->
-    <nav class="fixed top-0 left-0 w-full flex items-center justify-start px-6 md:px-16 py-4 bg-[#ffffff00] z-50">
+    <nav class="fixed top-0 left-0 w-full flex items-center justify-between md:justify-start px-6 md:px-16 py-4 bg-[#ffffff00] z-50">
         <div class="flex items-center space-x-2">
             <img src="{{ asset('images/1759230372585.png') }}" alt="Logo" class="h-[80px] md:h-[100px] w-auto">
         </div>
@@ -165,15 +185,24 @@
             <li><a href="{{ route('user.kontak.index') }}" class="hover:text-yellow-200 transition">Kontak</a></li>
         </ul>
 
-        <button class="md:hidden text-white text-3xl" id="menu-btn">☰</button>
+        <button id="menu-btn" class="md:hidden p-2 rounded-full shadow-md flex items-center justify-center" aria-label="Buka menu"
+            style="background-color: rgba(255,255,255,0.12); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+            <!-- Hamburger icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
     </nav>
 
-    <div id="menu"
-        class="hidden fixed top-[64px] left-0 w-full bg-[#5AA03E] text-white text-center py-3 space-y-2 z-40 shadow-md">
-        <a href="#" class="block hover:text-yellow-200">Cerita</a>
-        <a href="#" class="block hover:text-yellow-200">Si Baca</a>
-        <a href="#" class="block hover:text-yellow-200">Logo</a>
-        <a href="{{ route('user.kontak.index') }}" class="block hover:text-yellow-200">Kontak</a>
+    <div id="menu" class="hidden fixed top-[88px] left-4 right-4 bg-transparent text-white text-center py-4 space-y-2 z-40 shadow-lg rounded-lg"
+        style="background-color: rgba(255,255,255,0.12); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+        <ul class="flex flex-col gap-2">
+            <li><a href="{{ route('user.landing.index') }}" class="block py-2 text-lg font-semibold rounded text-white hover:text-orange-500 transition">Beranda</a></li>
+            <li><a href="{{ route('user.cerita.index') }}" class="block py-2 text-lg font-semibold rounded text-white hover:text-orange-500 transition">Cerita</a></li>
+            <li><a href="{{ route('user.si_baca.index') }}" class="block py-2 text-lg font-semibold rounded text-white hover:text-orange-500 transition">Si Baca</a></li>
+            <li><a href="{{ route('user.logo.index') }}" class="block py-2 text-lg font-semibold rounded text-white hover:text-orange-500 transition">Logo</a></li>
+            <li><a href="{{ route('user.kontak.index') }}" class="block py-2 text-lg font-semibold rounded text-white hover:text-orange-500 transition">Kontak</a></li>
+        </ul>
     </div>
 
     <!-- Main Content -->

@@ -44,6 +44,15 @@
             color: #6b7280;
         }
 
+        /* Bootstrap-friendly logo sizing */
+        .register-logo {
+            max-height: 112px; /* desktop default */
+            width: auto;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .form-control {
             border-radius: 12px;
             padding: 10px 15px;
@@ -94,11 +103,11 @@
 @section('body')
     <div class="register-card">
         <div class="text-center mb-4">
-            <h1 class="register-title">Nusantara Store</h1>
-            <p class="register-subtitle">Buat akun untuk mulai berbelanja</p>
+            <img src="{{ asset('images/1759230372585.png') }}" alt="Logo" class="img-fluid mx-auto d-block register-logo">
+            <p class="register-subtitle">Buat akun untuk mulai</p>
         </div>
 
-        <form action="{{ route('register.proses', ['role' => 'Buyer']) }}" method="post">
+        <form action="{{ route('register.proses', ['role' => 'User']) }}" method="post">
             @csrf
             <div class="mb-3">
                 <x-metronic-input name="name" type="text" caption="Nama Lengkap" placeholder="Masukkan Nama Lengkap"

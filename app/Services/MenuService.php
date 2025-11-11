@@ -9,11 +9,10 @@ class MenuService
     protected static array $admin = [
         ['route' => 'admin.dashboard', 'caption' => 'Dashboard'],
         ['route' => 'admin.user.index', 'caption' => 'User Program'],
-        'data_master' => ['route' => '#', 'caption' => 'Data Master', 'sub_menus' => [
-            ['route' => 'admin.categories.index', 'caption' => 'Kategori'],
-            ['route' => 'admin.category_sub.index', 'caption' => 'Sub Kategori'],
-            ['route' => 'admin.brands.index', 'caption' => 'Brand'],
-        ]],
+        ['route' => 'admin.cerita.index', 'caption' => 'Cerita'],
+        ['route' => 'admin.ruang_teka.index', 'caption' => 'Ruang Teka'],
+        ['route' => 'admin.cari_kata.index', 'caption' => 'Cari Kata'],
+        ['route' => 'admin.masukan.index', 'caption' => 'Masukan'],
     ];
 
     protected static array $user = [

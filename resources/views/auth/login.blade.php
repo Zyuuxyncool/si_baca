@@ -1,6 +1,6 @@
 @extends('admin.layouts.layout')
 
-@section('title', 'Login - Sibaca')
+@section('title', 'Login - ')
 
 @section('body-class', 'auth-bg')
 
@@ -42,6 +42,15 @@
     .login-subtitle {
         font-size: 15px;
         color: #6b7280;
+    }
+
+    /* Bootstrap-friendly logo sizing for login */
+    .login-logo {
+        max-height: 112px; /* desktop default */
+        width: auto;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .form-control {
@@ -135,7 +144,7 @@
 @section('body')
 <div class="login-card">
     <div class="text-center mb-4">
-        <h1 class="login-title">SI - Baca</h1>
+        <img src="{{ asset('images/1759230372585.png') }}" alt="Logo" class="img-fluid mx-auto d-block login-logo">
         <p class="login-subtitle">Masuk menggunakan akun Anda</p>
     </div>
 

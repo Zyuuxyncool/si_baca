@@ -8,7 +8,7 @@
         <option value="">{{ $caption }}</option>
     @endif
     @foreach($options as $key => $option)
-        <option value="{{ $key }}" @if($key === $value) selected @endif>{!! $option === '' ? '&nbsp;' : $option !!}</option>
+        <option value="{{ $key }}" @if($key === $value) selected @endif>{!! $option === '' ? '&nbsp;' : e($option) !!}</option>
     @endforeach
 </select>
 @if($alert === '1')

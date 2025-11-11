@@ -7,7 +7,9 @@
                 </div>
             @endif
             <a href="{{ url('') }}">
-                <h1 class="header-title mb-0">Nusantara <span class="text-siap">Store</span></h1>
+                <img alt="Logo" src="{{ asset('images/Logo_Si_Baca_fix_GreenScreen-removebg-preview.png') }}" class="d-lg-none img-logo h-70px" />
+                <img alt="Logo" src="{{ asset('images/Logo_Si_Baca_fix_GreenScreen-removebg-preview.png') }}" class="d-none d-lg-inline img-logo h-70px theme-light-show" />
+                <img alt="Logo" src="{{ asset('images/Logo_Si_Baca_fix_GreenScreen-removebg-preview.png') }}" class="d-none d-lg-inline img-logo h-70px theme-dark-show" />
             </a>
         </div>
 
