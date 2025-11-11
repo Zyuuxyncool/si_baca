@@ -142,20 +142,197 @@ let preview_image = (event, target_preview) => {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = (e) => document.getElementById(target_preview).src = e.target.result;
+        reader.onload = (e) => {
+            const el = document.getElementById(target_preview);
+            if (!el) return;
+            // If target is an <img>, set src. Otherwise, delegate to preview_file.
+            if (el.tagName.toLowerCase() === 'img') {
+                el.src = e.target.result;
+            } else {
+                // fallback to preview_file for other element types
+                preview_file(event, target_preview);
+            }
+        };
         reader.readAsDataURL(file);
     }
 }
 
+let preview_file = (event, target_preview) => {
+    const file = event.target.files[0];
+    console.debug('preview_file called', { target_preview, file });
+    if (!file) return console.debug('preview_file: no file selected');
+    const el = document.getElementById(target_preview);
+    if (!el) return console.debug('preview_file: preview element not found', target_preview);
+
+    // Some browsers or files may not provide `file.type`; fallback to extension detection
+    let type = file.type || '';
+    if (!type && file.name) {
+        const name = file.name.toString().toLowerCase();
+        if (name.endsWith('.mp4') || name.endsWith('.webm') || name.endsWith('.ogg') || name.endsWith('.mov')) {
+            type = 'video/mp4';
+        } else if (name.match(/\.(png|jpe?g|gif|bmp|webp)$/)) {
+            type = 'image/*';
+        }
+    }
+    if (el.tagName.toLowerCase() === 'img' || type.startsWith('image/')) {
+        // image preview
+        const reader = new FileReader();
+        reader.onload = (e) => el.src = e.target.result;
+        reader.readAsDataURL(file);
+        return;
+    }
+
+    if (el.tagName.toLowerCase() === 'video' || type.startsWith('video/')) {
+        // video preview: if element is <video>, set its src; if it's a container div, replace with video element
+        let videoEl = el.tagName.toLowerCase() === 'video' ? el : el.querySelector('video');
+        const objectUrl = URL.createObjectURL(file);
+        if (videoEl) {
+            // remove existing <source> children
+            console.debug('preview_file: using existing <video> element, setting source object URL', { objectUrl, type });
+            while (videoEl.firstChild) videoEl.removeChild(videoEl.firstChild);
+            const source = document.createElement('source');
+            source.src = objectUrl;
+            source.type = file.type || 'video/mp4';
+            videoEl.appendChild(source);
+                videoEl.load();
+                // handle cases where browser cannot decode the video (codec unsupported)
+                const onMeta = () => {
+                    try { videoEl.removeEventListener('loadedmetadata', onMeta); } catch(e){}
+                };
+                const onErr = (e) => {
+                    try { videoEl.removeEventListener('error', onErr); } catch(e){}
+                    // fallback: show filename and size
+                    const placeholder = document.createElement('div');
+                    placeholder.id = target_preview;
+                    placeholder.className = videoEl.className + ' d-flex flex-column align-items-center justify-content-center';
+                    placeholder.style.minHeight = '120px';
+                    placeholder.style.background = '#f5f5f5';
+                    placeholder.style.color = '#666';
+                    const nameEl = document.createElement('div');
+                    nameEl.innerText = file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+                    const hint = document.createElement('small');
+                    hint.className = 'text-muted';
+                    hint.innerText = 'Preview tidak tersedia di browser ini (kemungkinan codec tidak didukung). File akan tetap diunggah.';
+                    placeholder.appendChild(nameEl);
+                    placeholder.appendChild(hint);
+                    videoEl.parentNode.replaceChild(placeholder, videoEl);
+                };
+                videoEl.addEventListener('loadedmetadata', onMeta);
+                videoEl.addEventListener('error', onErr);
+            // ensure controls visible
+            videoEl.controls = true;
+        } else {
+            console.debug('preview_file: creating new <video> element', { objectUrl, type });
+            // replace container with a video element
+            const newVideo = document.createElement('video');
+            newVideo.id = target_preview;
+            newVideo.className = el.className;
+            newVideo.controls = true;
+            newVideo.style.maxWidth = '100%';
+            const source = document.createElement('source');
+            source.src = objectUrl;
+            source.type = file.type || 'video/mp4';
+            newVideo.appendChild(source);
+                // attach handlers for decode/fallback
+                newVideo.addEventListener('loadedmetadata', () => {});
+                newVideo.addEventListener('error', () => {
+                    const placeholder = document.createElement('div');
+                    placeholder.id = target_preview;
+                    placeholder.className = newVideo.className + ' d-flex flex-column align-items-center justify-content-center';
+                    placeholder.style.minHeight = '120px';
+                    placeholder.style.background = '#f5f5f5';
+                    placeholder.style.color = '#666';
+                    const nameEl = document.createElement('div');
+                    nameEl.innerText = file.name + ' (' + Math.round(file.size/1024) + ' KB)';
+                    const hint = document.createElement('small');
+                    hint.className = 'text-muted';
+                    hint.innerText = 'Preview tidak tersedia di browser ini (kemungkinan codec tidak didukung). File akan tetap diunggah.';
+                    placeholder.appendChild(nameEl);
+                    placeholder.appendChild(hint);
+                    el.parentNode.replaceChild(placeholder, el);
+                });
+            el.parentNode.replaceChild(newVideo, el);
+        }
+        // Also update modal player (if present) so preview in modal shows selected file
+        try {
+            const modalPlayer = document.getElementById(target_preview + '_player');
+            if (modalPlayer) {
+                while (modalPlayer.firstChild) modalPlayer.removeChild(modalPlayer.firstChild);
+                const msource = document.createElement('source');
+                msource.src = objectUrl;
+                msource.type = file.type || 'video/mp4';
+                modalPlayer.appendChild(msource);
+                modalPlayer.load();
+                modalPlayer.controls = true;
+            }
+        } catch (e) { console.warn(e); }
+        return;
+    }
+
+    // fallback: for other file types, show filename
+    if (el.tagName.toLowerCase() === 'div') {
+        el.innerHTML = '<small>' + file.name + '</small>';
+    } else {
+        try { el.src = ''; } catch (e) {}
+    }
+}
+
 let open_file = (target, target_preview) => {
-    document.getElementById(target).addEventListener('change', (event) => preview_image(event, target_preview));
-    $('#' + target).click();
+    const inputEl = document.getElementById(target);
+    if (!inputEl) return console.warn('open_file: input not found', target);
+    // remove any previous change listeners to avoid duplicate handlers
+    const newInputEl = inputEl.cloneNode(true);
+    inputEl.parentNode.replaceChild(newInputEl, inputEl);
+    newInputEl.addEventListener('change', (event) => preview_file(event, target_preview));
+    newInputEl.click();
 };
 
 let remove_file = (target, target_preview, default_url) => {
     console.log(target);
-    document.getElementById(target).setAttribute('value', '1');
-    document.getElementById(target_preview).src = default_url;
+    const inputEl = document.getElementById(target);
+    if (inputEl) inputEl.setAttribute('value', '1');
+    const previewEl = document.getElementById(target_preview);
+    if (!previewEl) return;
+    // If preview is an <img>, set src to default_url
+    if (previewEl.tagName.toLowerCase() === 'img') {
+        previewEl.src = default_url;
+        return;
+    }
+    // If preview is a <video>, remove sources and show empty poster or default_url
+    if (previewEl.tagName.toLowerCase() === 'video') {
+        while (previewEl.firstChild) previewEl.removeChild(previewEl.firstChild);
+        if (default_url) {
+            const source = document.createElement('source');
+            source.src = default_url;
+            previewEl.appendChild(source);
+            previewEl.load();
+        } else {
+            // replace with a placeholder div
+            const placeholder = document.createElement('div');
+            placeholder.id = target_preview;
+            placeholder.className = previewEl.className + ' d-flex align-items-center justify-content-center';
+            placeholder.style.minHeight = '120px';
+            placeholder.style.background = '#f5f5f5';
+            placeholder.style.color = '#666';
+            placeholder.innerHTML = '<small>Tidak ada video</small>';
+            previewEl.parentNode.replaceChild(placeholder, previewEl);
+        }
+        // also clear modal player if exists
+        try {
+            const modalPlayer = document.getElementById(target_preview + '_player');
+            if (modalPlayer) {
+                while (modalPlayer.firstChild) modalPlayer.removeChild(modalPlayer.firstChild);
+                // replace with placeholder text
+                const ph = document.createElement('div');
+                ph.className = 'text-center text-muted';
+                ph.innerHTML = 'Tidak ada video untuk ditampilkan.';
+                modalPlayer.parentNode.replaceChild(ph, modalPlayer);
+            }
+        } catch (e) {}
+        return;
+    }
+    // Fallback: set innerHTML for container
+    previewEl.innerHTML = default_url ? '<img src="' + default_url + '"/>' : '';
 };
 
 let setCookie = (name, value, days) => {

@@ -9,6 +9,6 @@ class SiBacaController extends Controller
 {
     public function index()
     {
-        return view('User.si_baca.index');
+        return view('user.si_baca.index');
     }
 }

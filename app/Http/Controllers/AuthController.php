@@ -28,19 +28,19 @@ class AuthController extends Controller
 
         auth()->login($user, !$request->has('remember'));
 
-        $akses = $user->akses->akses ?? 'user';
+        $akses = $user->akses->akses ?? 'User';
         $base_routes = $userService->base_routes();
-        if ($akses === 'user') {
-            return redirect()->route($base_routes[$akses] . '.landing');
-        } else {
-            return redirect()->route($base_routes[$akses] . '.dashboard');
-        }
+        $base = $base_routes[$akses] ?? 'user';
+        // Route names differ between user and admin
+        return $base === 'user'
+            ? redirect()->route('user.landing.index')
+            : redirect()->route($base . '.dashboard');
     }
 
     public function register(Request $request)
     {
         $role = $request->input('role', 'user');
-        if (auth()->check()) return redirect()->route('user.landing');
+        if (auth()->check()) return redirect()->route('user.landing.index');
         $allowed = ['user'];
         if (!in_array($role, $allowed)) $role = 'user';
         return view('auth.register', compact('role'));
@@ -49,25 +49,33 @@ class AuthController extends Controller
     public function register_proses(Request $request)
     {
         $userService = new UserService();
-        // $profiluserService = new ProfiluserService();
+        // Normalize role; default to 'User'
+        $roleInput = $request->input('role', 'User');
+        $role = ucfirst(strtolower($roleInput));
 
-        $role = $request->input('role') ?? 'user';
-        if ($role === 'user') {
+        $user = null;
+        if ($role === 'User') {
             $user = $userService->store([
                 'name' => $request->input('name'),
                 'email' => $request->input('email'),
-                'password' => $request->input('password')
+                'password' => $request->input('password'),
             ]);
-            $user->akses()->create(['akses' => 'user']);
-            // $profiluserService->store(['user_id' => $user->id, 'nama' => $user->name]);
+            // store akses consistently with model constants
+            $user->akses()->create(['akses' => 'User']);
             auth()->login($user);
         }
 
         $base_routes = $userService->base_routes();
-        if (!isset($user)) {
-            return redirect()->route($base_routes[$user->akses->akses] ?? '/');
+        if ($user) {
+            $akses = $user->akses->akses ?? 'User';
+            $base = $base_routes[$akses] ?? 'user';
+            return $base === 'user'
+                ? redirect()->route('user.landing.index')
+                : redirect()->route($base . '.dashboard');
         }
 
+        // Fallback redirect if user was not created (e.g., unsupported role)
+        return redirect()->route('user.landing.index');
     }
 
     public function logout()

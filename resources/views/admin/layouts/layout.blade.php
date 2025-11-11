@@ -34,17 +34,37 @@
 <script src="{{ asset('assets_admin/plugins/custom/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
 <script src="{{ asset('assets_admin/js/auto-numeric.js') }}"></script>
 <script src="{{ asset('assets_admin/js/io.js') }}"></script>
-<script>
-    @if(session()->has('success'))
-        swal.fire('{{ session('success') }}');
-    @endif
-    @if(session()->has('error'))
-    Swal.fire({
-        icon: "error",
-        title: "{{ session('error') }}",
-    });
-    @endif
-</script>
+    <script>
+        // Guarded SweetAlert usage to avoid ReferenceError if library not loaded yet
+        @if(session()->has('success'))
+            if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+                Swal.fire({
+                    icon: 'success',
+                    title: "{{ session('success') }}",
+                });
+            } else if (typeof swal !== 'undefined' && typeof swal.fire === 'function') {
+                // fallback if lowercase swal is present
+                swal.fire("{{ session('success') }}");
+            } else {
+                console.warn('SweetAlert not available to show success message');
+            }
+        @endif
+        @if(session()->has('error'))
+            if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+                Swal.fire({
+                    icon: 'error',
+                    title: "{{ session('error') }}",
+                });
+            } else if (typeof swal !== 'undefined' && typeof swal.fire === 'function') {
+                swal.fire({
+                    icon: 'error',
+                    title: "{{ session('error') }}",
+                });
+            } else {
+                console.warn('SweetAlert not available to show error message');
+            }
+        @endif
+    </script>
 @stack('scripts')
 </body>
 </html>

@@ -114,7 +114,7 @@
 
         /* Tata Letak Bagian Bawah */
         .bottom-half .content-wrapper {
-            grid-template-columns: 1fr 1.5fr;
+            /* grid-template-columns: 1fr 1.5fr; */
         }
 
         .description-placeholder {
@@ -136,60 +136,106 @@
         /* Responsif untuk Mobile */
         @media (max-width: 768px) {
 
+            /* Mobile layout: stack cleanly and scale assets for small screens */
             .top-half,
             .bottom-half {
                 flex: none;
                 height: auto;
-                min-height: 50vh;
-                padding: 30px 20px;
+                min-height: auto;
+                padding: 16px 12px;
             }
 
+            /* ensure container fills viewport so body background doesn't show */
             .color-container {
                 height: auto;
+                min-height: 100vh;
             }
 
             .content-wrapper {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 8px;
+                padding: 0 14px;
             }
 
-            .title-section {
-                text-align: center;
-                order: 1;
-            }
-
+            /* Show a small podium/logo on mobile (scaled & centered) instead of the huge desktop version */
             .logo-section {
-                order: 2;
-                /* Perubahan: Atur tinggi spesifik untuk penempatan logo absolute di mobile */
-                height: 250px;
+                display: block;
+                order: 1;
+                height: auto;
+                padding: 6px 0 0 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
             }
 
             .sibaca-logo-img {
-                /* Perubahan: Sedikit lebih kecil di mobile */
-                height: 120%;
-                bottom: -30px;
+               display: block;
+                position: relative;
+                left: auto;
+                transform: none;
+                height: auto;
+                width: 500px;
+                max-width: 300%;
+                bottom: -115px;
+                object-fit: contain;
+                margin: 0 auto 12px auto;
+                filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.2));
             }
 
-            .description-section {
-                order: 3;
+            /* Shrink the nav logo on mobile so it doesn't dominate the header */
+            nav img { height: 44px; }
+
+            /* Center the title on mobile and tighten spacing so it wraps neatly; move it slightly down */
+            .title-section {
+                order: 2;
                 text-align: center;
-                padding-right: 0;
-            }
-
-            .bottom-half {
-                /* Perubahan: Padding atas disesuaikan di mobile */
-                padding-top: 50px;
+                padding: 147px 0px 0 12px; /* increased top padding to push title down */
             }
 
             .title-section h2 {
-                font-size: 48px;
+                font-size: 38px;
+                line-height: 1.02;
+                margin: 6px 0 0 0;
+                font-weight: 900;
+                letter-spacing: -0.5px;
             }
+
+            /* Make the description fill the green background: stretch full width but keep text left-aligned */
+            .description-section {
+                order: 3;
+                text-align: left; /* paragraph text remains left aligned */
+                display: flex;
+                justify-content: stretch; /* make the paragraph fill available width */
+                padding: 18px 12px 8px 12px;
+            }
+
+            .bottom-half {
+                padding-top: 6px;
+                padding-bottom: 28px;
+            }
+
+            .description-section p {
+                font-size: 15px;
+                line-height: 1.6;
+                max-width: none;
+                width: 100%;
+                margin: 0;
+                text-align: left;
+                padding: 0 8px; /* small inner padding so text isn't flush to edges */
+            }
+
+            /* hide the empty left placeholder column on mobile so description can occupy full area */
+            .description-placeholder { display: none; }
+
+            /* Make top and bottom halves each occupy about half the viewport on mobile so there's no gap */
+            .top-half { min-height: 48vh; }
+            .bottom-half { min-height: 52vh; }
         }
     </style>
 </head>
 
 <body>
-    <nav class="fixed top-0 left-0 w-full flex items-center justify-start px-6 md:px-16 py-4 bg-[#ffffff00] z-50">
+    <nav class="fixed top-0 left-0 w-full flex items-center justify-between md:justify-start px-6 md:px-16 py-4 bg-[#ffffff00] z-50">
         <div class="flex items-center space-x-2">
             <img src="{{ asset('images/1759230372585.png') }}" alt="Logo" class="h-[80px] md:h-[100px] w-auto">
         </div>
@@ -202,15 +248,24 @@
             <li><a href="{{ route('user.kontak.index') }}" class="hover:text-yellow-200 transition">Kontak</a></li>
         </ul>
 
-        <button class="md:hidden text-white text-3xl" id="menu-btn">☰</button>
+        <button id="menu-btn" class="md:hidden p-2 rounded-full shadow-md flex items-center justify-center" aria-label="Buka menu"
+            style="background-color: rgba(255,255,255,0.12); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+            <!-- Hamburger icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
     </nav>
 
-    <div id="menu"
-        class="hidden fixed top-[64px] left-0 w-full bg-[#5AA03E] text-white text-center py-3 space-y-2 z-40 shadow-md">
-        <a href="#" class="block hover:text-yellow-200">Cerita</a>
-        <a href="#" class="block hover:text-yellow-200">Si Baca</a>
-        <a href="#" class="block hover:text-yellow-200">Logo</a>
-        <a href="{{ route('user.kontak.index') }}" class="block hover:text-yellow-200">Kontak</a>
+    <div id="menu" class="hidden fixed top-[88px] left-4 right-4 bg-transparent text-white text-center py-4 space-y-2 z-40 shadow-lg rounded-lg"
+        style="background-color: rgba(255,255,255,0.12); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);">
+        <ul class="flex flex-col gap-2">
+            <li><a href="{{ route('user.landing.index') }}" class="block py-2 text-lg font-semibold rounded text-white hover:text-orange-500 transition">Beranda</a></li>
+            <li><a href="{{ route('user.cerita.index') }}" class="block py-2 text-lg font-semibold rounded text-white hover:text-orange-500 transition">Cerita</a></li>
+            <li><a href="{{ route('user.si_baca.index') }}" class="block py-2 text-lg font-semibold rounded text-white hover:text-orange-500 transition">Si Baca</a></li>
+            <li><a href="{{ route('user.logo.index') }}" class="block py-2 text-lg font-semibold rounded text-white hover:text-orange-500 transition">Logo</a></li>
+            <li><a href="{{ route('user.kontak.index') }}" class="block py-2 text-lg font-semibold rounded text-white hover:text-orange-500 transition">Kontak</a></li>
+        </ul>
     </div>
     <div class="color-container">
         <div class="top-half">
@@ -249,5 +304,13 @@
         </div>
     </div>
 </body>
+   <script>
+        // Toggle mobile menu
+        const menuBtn = document.getElementById('menu-btn');
+        const menu = document.getElementById('menu');
 
+        menuBtn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
+    </script>
 </html>
